@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Example</title>
+</head>
+<body>
+
+    <h1>Fetch Example</h1>
+
+    <div>
+        <label for="english">English ID:</label>
+        <input type="text" id="english" placeholder="Enter English ID">
+    </div>
+    <div>
+        <label for="russian">Russian ID:</label>
+        <input type="text" id="russian" placeholder="Enter Russian ID">
+    </div>
+    <div>
+        <label for="czech">Czech ID:</label>
+        <input type="text" id="czech" placeholder="Enter Czech ID">
+    </div>
+
+    <!-- Кнопка для выполнения запроса -->
+    <button onclick="fetchData()">Fetch Data</button>
+
+    <div id="result"></div>
+
+    <script>
+        // Функция для выполнения fetch-запроса
+        function fetchData() {
+             // Получаем значения из input
+            const english = document.getElementById('english').value;
+            const russian = document.getElementById('russian').value;
+            const czech = document.getElementById('czech').value;
+
+              // Формируем тело запроса в виде JSON
+            const body = JSON.stringify({ english, russian, czech });
+
+            // fetch('http://192.168.1.35:9999/search/trolley')
+            fetch('http://192.168.1.35:9999/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body
+            })
+            .then(response => response.json()) // Преобразуем ответ в JSON
+            .then(data => {
+                // Показываем результат на странице
+                document.getElementById('result').innerHTML = `
+                    <p>Title: ${JSON.stringify(data)}</p>
+                `;
+            })
+            .catch(error => {
+                // Обработка ошибок
+                console.error('Error fetching data:', error);
+            });
+        }
+
+        // Вызываем функцию при загрузке страницы
+        fetchData();
+    </script>
+</body>
+</html>

@@ -1,10 +1,13 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from flask import Flask, Response
+from flask import Flask, Response, request, jsonify
 from flask_restful import Api, Resource
 import mysql.connector
+from flask_cors import CORS
+import requests
 import json
 
 app = Flask(__name__)
+CORS(app)
 api = Api()
 
 mydb = mysql.connector.connect(
@@ -34,21 +37,6 @@ def selection_word():
         wrd.append(i[0][:-1])
     return wrd
 
-
-
-# words = [
-#     {1:	["arise",	"arose",	"arisen"]},
-#     {2:	["awake",	"awoke",	"awoken"]},
-#     {3:	["backslide",	"backslid",	"backslid"]},
-    # 4:	{be [am, is, are]	was/were	been},
-    # 5:	{bear	bore	born},
-    # 6:	{beat	beat	beat},
-    # 7:	{become	became	become},
-    # 8:	{begin	began	begun},
-    # 9:	{bend	bend	bent},
-    # 10:	{bet	bet	bet},
-
-
 # class Main(Resource):
 #     def get(self, word_id):
 #         return selection_id(word_id)
@@ -56,7 +44,7 @@ def selection_word():
 @app.route('/search/<word>')
 def search_text(word):
     if word in selection_word():
-        return 'success'
+        return {'data': 'success'}
     else:
         return 'page not found'
     
@@ -65,6 +53,33 @@ def search_text(word):
 def get(word_id):
     return selection_id(word_id)
 
+@app.route('/add', methods=['POST'])
+def process_data():
+    # Получаем данные из POST-запроса
+    data = request.json()
+
+    # Обрабатываем полученные данные
+    english = data.get('english')
+    russian = data.get('russian')
+    czech = data.get('czech')
+
+    # Возвращаем результат в виде JSON
+    return jsonify({
+        'english': english,
+        'russian': russian,
+        'czech': czech
+    })
+
+
+# url = 'http://192.168.1.35:9999/add'
+data1 = {
+    'english': '123',
+    'russian': '456',
+    'czech': '789'
+}
+response = requests.post('http://192.168.1.35:9999/add', data=data1)
+
+print(response.text)
 
 # api.add_resource(Main, '/words/<int:word_id>')
 # api.init_app(app)
