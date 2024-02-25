@@ -1,10 +1,13 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from flask import Flask, Response, request, jsonify
+from flask import Flask, Response, request, json, redirect, url_for, render_template
 from flask_restful import Api, Resource
 import mysql.connector
 from flask_cors import CORS
 import requests
 import json
+
+HOST = '192.168.1.35'
+PORT = 9999
 
 app = Flask(__name__)
 CORS(app)
@@ -53,56 +56,18 @@ def search_text(word):
 def get(word_id):
     return selection_id(word_id)
 
-@app.route('/add', methods=['POST'])
+
+@app.route('/add', methods=['POST', 'GET'])
 def process_data():
-    # Получаем данные из POST-запроса
-    data = request.json()
+    if request.method=='POST':
+        user=request.form['nm']
+        return redirect(url_for('user', usr=user))
+    else:
+        return render_template('test_index.html')
 
-    # Обрабатываем полученные данные
-    english = data.get('english')
-    russian = data.get('russian')
-    czech = data.get('czech')
-
-    # Возвращаем результат в виде JSON
-    return jsonify({
-        'english': english,
-        'russian': russian,
-        'czech': czech
-    })
-
-
-# url = 'http://192.168.1.35:9999/add'
-data1 = {
-    'english': '123',
-    'russian': '456',
-    'czech': '789'
-}
-response = requests.post('http://192.168.1.35:9999/add', data=data1)
-
-print(response.text)
-
-# api.add_resource(Main, '/words/<int:word_id>')
-# api.init_app(app)
-
-HOST = '192.168.1.35'
-PORT = 9999
-
-
-# class NeuralHTTP(BaseHTTPRequestHandler):
-#     def do_GET(self):
-#         self.send_response(200)
-#         self.send_header('Content-type', 'text/html')
-#         self.end_headers()
-#         self.wfile.write(bytes("{'eng':'123'}", "utf-8"))
-
-
-
-# server = HTTPServer((HOST, PORT), NeuralHTTP)
-# responce = requests.get('http://192.168.1.35:9999/')
-# fox = responce.json()
-# print(fox)
-# server.serve_forever()
-# server.server_close()
+@app.route('/<usr>')
+def user(usr):
+    return f"<h1>{usr}</h1>"
 
 
 if __name__ == '__main__':
