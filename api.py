@@ -10,6 +10,7 @@ HOST = '192.168.1.35'
 PORT = 9999
 
 app = Flask(__name__)
+
 CORS(app)
 api = Api()
 
@@ -40,6 +41,17 @@ def selection_word():
         wrd.append(i[0][:-1])
     return wrd
 
+def add_new_word(rcv_data):
+    sql_insert_query = """INSERT INTO main (english, russian, chech) 
+                                VALUES (%s, %s, %s)"""
+    tuple1 = (rcv_data['english'], rcv_data['russian'], rcv_data['czech'])
+    mycursor.execute(sql_insert_query, tuple1)
+    if mydb.commit():
+        return True
+    else:
+        return False
+
+
 # class Main(Resource):
 #     def get(self, word_id):
 #         return selection_id(word_id)
@@ -59,15 +71,25 @@ def get(word_id):
 
 @app.route('/add', methods=['POST', 'GET'])
 def process_data():
+    
     if request.method=='POST':
-        user=request.form['nm']
-        return redirect(url_for('user', usr=user))
+        if request.data:
+            rcv_data = json.loads(request.data.decode(encoding='utf-8'))
+
+            data_success = {'data': {'success': 'true'}}
+            data_fail = {'data': {'success': 'false'}}
+
+            if add_new_word(rcv_data) == True:
+                return data_success
+            else:
+                return data_fail
+            
     else:
-        return render_template('test_index.html')
+        return render_template('index.html')
 
 @app.route('/<usr>')
 def user(usr):
-    return f"<h1>{usr}</h1>"
+    return f"<h1>{'Success add '+ usr}</h1>"
 
 
 if __name__ == '__main__':
