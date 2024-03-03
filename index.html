@@ -8,7 +8,6 @@
 <body>
 
     <h1>Fetch Example</h1>
-    <form>
         <div>
             <label for="english">English:</label>
             <input type="text" id="english" placeholder="Enter English Word">
@@ -24,7 +23,6 @@
 
         <!-- Кнопка для выполнения запроса -->
         <button onclick="fetchData()">Fetch Data</button>
-    </form>
     <div id="result"></div>
 
     <script>
@@ -38,6 +36,17 @@
               // Формируем тело запроса в виде JSON
             const body = JSON.stringify({ english, russian, czech });
 
+            // const response = await ('http://192.168.1.35:9999/add', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Accept': 'application/json',
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: body
+            // });
+            // const json = await response.json(); 
+            // console.log(json)
+
             // fetch('http://192.168.1.35:9999/search/trolley')
             fetch('http://192.168.1.35:9999/add', {
                 method: 'POST',
@@ -49,9 +58,7 @@
             .then(response => response.json()) // Преобразуем ответ в JSON
             .then(data => {
                 // Показываем результат на странице
-                document.getElementById('result').innerHTML = `
-                    <p>Title: ${JSON.stringify(data)}</p>
-                `;
+                document.getElementById('result').innerHTML = JSON.stringify(data);
             })
             .catch(error => {
                 // Обработка ошибок
@@ -60,7 +67,7 @@
         }
 
         // Вызываем функцию при загрузке страницы
-        fetchData();
+        // fetchData();
     </script>
 </body>
 </html>
