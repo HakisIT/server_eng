@@ -3,7 +3,7 @@ from flask import Flask, Response, request, json, redirect, url_for, render_temp
 from flask_restful import Api, Resource
 import mysql.connector
 from flask_cors import CORS
-import requests
+import random
 import json
 
 HOST = '192.168.1.35'
@@ -31,6 +31,15 @@ def selection_id(word_id):
     word1 = mycursor.fetchall()
     dct = {word1[0][0]:[word1[0][1], word1[0][2], word1[0][3]]}
     return Response(str(dct), content_type='text/html; charset=utf-8')
+
+def select_main():
+    mycursor = mydb.cursor()
+    mycursor.execute('SELECT id FROM main')
+    words = mycursor.fetchall()
+    id_lst = []
+    for i in words:
+        id_lst.append(i[0])
+    return id_lst
 
 def selection_word():
     sql_select_query = "SELECT english FROM main"
@@ -65,7 +74,7 @@ def add_new_word(rcv_data):
         return True
     else:
         return False
-
+    
 
 # class Main(Resource):
 #     def get(self, word_id):
@@ -100,12 +109,17 @@ def process_data():
                 print("false", data_fail)
                 return jsonify(data_fail)
             
-    # else:
-    #     return render_template('index.html')
 
 @app.route('/<usr>')
 def user(usr):
     return f"<h1>{'Success add '+ usr}</h1>"
+
+
+@app.route('/random')
+def random_id():
+    rnd_id = random.choice(select_main())
+    return selection_id(rnd_id)
+
 
 
 if __name__ == '__main__':
