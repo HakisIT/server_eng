@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Example</title>
+</head>
+<body>
+
+    <h1>Fetch Example</h1>
+        <div>
+            <label for="user">User:</label>
+            <input type="text" id="user" placeholder="Enter youre username">
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="text" id="password" placeholder="Enter youre password">
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="text" id="email" placeholder="Enter youre email">
+        </div>
+
+        <!-- Кнопка для выполнения запроса -->
+        <button onclick="fetchData()">Fetch Data</button>
+    <div id="result"></div>
+
+    <script>
+        // Функция для выполнения fetch-запроса
+        function fetchData() {
+             // Получаем значения из input
+            const user = document.getElementById('user').value;
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+
+              // Формируем тело запроса в виде JSON
+            const body = JSON.stringify({ user, password, email });
+
+            // const response = await ('http://192.168.1.35:9999/add', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Accept': 'application/json',
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: body
+            // });
+            // const json = await response.json(); 
+            // console.log(json)
+
+            // fetch('http://192.168.1.35:9999/search/trolley')
+            fetch('http://192.168.1.35:9999/registration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body
+            })
+            .then(response => response.json()) // Преобразуем ответ в JSON
+            .then(data => {
+                // Показываем результат на странице
+                document.getElementById('result').innerHTML = JSON.stringify(data);
+            })
+            .catch(error => {
+                // Обработка ошибок
+                console.error('Error fetching data:', error);
+            });
+        }
+
+        // Вызываем функцию при загрузке страницы
+        // fetchData();
+    </script>
+</body>
+</html>
