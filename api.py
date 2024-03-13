@@ -87,17 +87,11 @@ def validate_regist(data):
 
 
 def hash_password(data):
-    if validate_regist(data) == True:
-        new = data.split()
-        hs = hashlib.md5(new.encode()).hexdigest()
-        return hs
-    else:
-        return False
+    data_json = json.dumps(data)
+    return hashlib.sha256(data_json.encode('utf-8')).hexdigest()
 
 
 def add_new_user(rcv_data):
-    print('rcv_data', rcv_data)
-
     if hash_password(rcv_data) != '':
         hash_pass = hash_password(rcv_data['password'])
         sql_insert_query = """INSERT INTO user_info (user_name, password, email) 
