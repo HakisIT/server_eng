@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration</title>
+    <title>Authorization</title>
 </head>
 <body>
 
-    <h1>Registration</h1>
+    <h1>Authorization</h1>
         <div>
             <label for="user">User:</label>
             <input type="text" id="user" placeholder="Enter youre username">
@@ -15,10 +15,6 @@
         <div>
             <label for="password">Password:</label>
             <input type="text" id="password" placeholder="Enter youre password">
-        </div>
-        <div>
-            <label for="email">Email:</label>
-            <input type="text" id="email" placeholder="Enter youre email">
         </div>
 
         <!-- Кнопка для выполнения запроса -->
@@ -31,10 +27,9 @@
              // Получаем значения из input
             const user = document.getElementById('user').value;
             const password = document.getElementById('password').value;
-            const email = document.getElementById('email').value;
 
               // Формируем тело запроса в виде JSON
-            const body = JSON.stringify({ user, password, email });
+            const body = JSON.stringify({ user, password});
 
             // const response = await ('http://192.168.1.35:9999/add', {
             //     method: 'POST',
