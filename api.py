@@ -70,6 +70,15 @@ def users_list():
         users_lst.append(i[0])
     return users_lst
 
+def users_and_hash_list():
+    sql_select_query = "SELECT user_name, password FROM user_info"
+    mycursor.execute(sql_select_query)
+    users = mycursor.fetchall()
+    users_and_hash_lst = {}
+    for i in users:
+        users_and_hash_lst.update({i[0]:i[1]})
+    return users_and_hash_lst
+
 def validate_word(data):
     # check is digit in data
     if any(char.isdigit() for char in data['english']) or any(char.isdigit() for char in data['russian']) or any(char.isdigit() for char in data['czech']):
@@ -96,20 +105,26 @@ def add_new_word(rcv_data):
         return False
     
 
-def validate_regist(data):    
-    if data['user'] not in users_list():
-        if data['user'] == '' or data['password'] == '' or data['email'] == '':
-            return 'Fill in all the blanks'
-        else:
-            return True
-        
+def validate_registration(data):    
+    if data['user'] == '' or data['password'] == '' or data['email'] == '':
+        return 'Fill in all the blanks'
+    else:
+        return True
 
-def validate_autoriz(data):
-    if data['user'] in users_list():
-        if data['user'] == '' or data['password'] == '':
-            return 'Fill in all the blanks'
-        else:
+def validate_autoriz(data):    
+    if data['user'] == '' or data['password'] == '':
+        return 'Fill in all the blanks'
+    else:
+        return True
+    
+
+def user_verification(user, password):
+    if user in users_and_hash_list():
+        if users_and_hash_list()[user] == hash_password(password):
             return True
+        else:
+            return False
+
 
 
 def hash_password(data):
@@ -118,7 +133,7 @@ def hash_password(data):
 
 
 def add_new_user(rcv_data):
-    if hash_password(rcv_data) != '' and validate_regist(rcv_data) == True:
+    if hash_password(rcv_data) != '' and validate_registration(rcv_data) == True and rcv_data['user'] not in users_list():
         hash_pass = hash_password(rcv_data['password'])
         sql_insert_query = """INSERT INTO user_info (user_name, password, email) 
                                     VALUES (%s, %s, %s)"""
@@ -127,17 +142,18 @@ def add_new_user(rcv_data):
         mydb.commit()
         return True
     
-    elif validate_regist(rcv_data) == 'Fill in all the blanks':
+    elif validate_registration(rcv_data) == 'Fill in all the blanks':
         return 'Fill in all the blanks'
     else:
         return False
 
 
 def login(rcv_data):
-    if hash_password(rcv_data) != '' and validate_autoriz(rcv_data) == True:
-        
+    if validate_autoriz(rcv_data) == True and user_verification(rcv_data['user'], rcv_data['password']) == True:      
         return True
     
+    elif validate_autoriz(rcv_data) == True and user_verification(rcv_data['user'], rcv_data['password']) == False:
+        return 'Wrong password'
     elif validate_autoriz(rcv_data) == 'Fill in all the blanks':
         return 'Fill in all the blanks'
     else:
@@ -192,19 +208,22 @@ def autoriz():
     if request.data:
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
 
-        if add_new_user(rcv_data) == True:
+        if login(rcv_data) == True:
             return jsonify('Success authorization !')
         
-        elif add_new_user(rcv_data) == 'Fill in all the blanks':
+        elif login(rcv_data) == 'Wrong password':
+            return jsonify('Wrong password')
+        
+        elif login(rcv_data) == 'Fill in all the blanks':
             return jsonify('Fill in all the blanks')
         
         else:
             return jsonify('This user does not exist')
 
 
-@app.route('/<usr>')
-def user(usr):
-    return f"<h1>{'Success add '+ usr}</h1>"
+# @app.route('/<usr>')
+# def user(usr):
+#     return f"<h1>{'Success add '+ usr}</h1>"
 
 
 @app.route('/random')
