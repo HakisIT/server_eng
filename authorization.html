@@ -53,7 +53,9 @@
             .then(response => response.json()) // Преобразуем ответ в JSON
             .then(data => {
                 // Показываем результат на странице
-                document.getElementById('result').innerHTML = JSON.stringify(data);
+                // document.getElementById('result').innerHTML = JSON.stringify(data);
+                console.log(data)
+                localStorage.setItem('token',data.token)
             })
             .catch(error => {
                 // Обработка ошибок

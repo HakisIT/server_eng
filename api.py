@@ -7,6 +7,7 @@ import random
 import json
 import hashlib
 
+
 HOST = '192.168.1.35'
 PORT = 9999
 
@@ -58,8 +59,9 @@ def user_info():
     users = mycursor.fetchall()
     user_info = {}
     for i in users:
-        user_info.update({i[0]:[i[1], i[2], i[3]]})
+        user_info.update({i[0]:[i[1], i[2], i[3], i[4]]})
     return user_info
+
 
 def users_list():
     sql_select_query = "SELECT user_name FROM user_info"
@@ -126,7 +128,6 @@ def user_verification(user, password):
             return False
 
 
-
 def hash_password(data):
     data_json = json.dumps(data)
     return hashlib.sha256(data_json.encode('utf-8')).hexdigest()
@@ -158,6 +159,18 @@ def login(rcv_data):
         return 'Fill in all the blanks'
     else:
         return False
+    
+def add_uuid(rcv_data):
+    import uuid
+    uuid_result = {'code':'200', 'token':uuid.uuid1(random.randint(10,10**12))}
+    for key, sublist in user_info().items():
+        if rcv_data['user'] in sublist:
+            sql_insert_query = """INSERT INTO user_actions (id, uuid, action) 
+                                    VALUES (%s, %s, %s)"""
+            tuple1 = (key, uuid_result, selection_id(key))
+            mycursor.execute(sql_insert_query, tuple1)
+            mydb.commit()
+    
 
 # class Main(Resource):
 #     def get(self, word_id):
@@ -195,7 +208,7 @@ def regist():
         print('POST rcv_data', rcv_data)
 
         if add_new_user(rcv_data) == True:
-            return jsonify('Success registation !')
+            return jsonify('Success registration !')
         
         elif add_new_user(rcv_data) == 'Fill in all the blanks':
             return jsonify('Fill in all the blanks')
@@ -209,6 +222,7 @@ def autoriz():
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
 
         if login(rcv_data) == True:
+            add_uuid(rcv_data)
             return jsonify('Success authorization !')
         
         elif login(rcv_data) == 'Wrong password':
