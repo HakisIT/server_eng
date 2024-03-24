@@ -1,73 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fetch Example</title>
+    <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
+    <nav class="navigation">
+        <ul class="navigation__list">
+            <li class="navigation__item"><a class="navigation__link" href="#one">Add</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#two">Empty</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#three">Registration</a></li>
+        </ul>
+    </nav>
 
-    <h1>Fetch Example</h1>
-        <div>
-            <label for="english">English:</label>
-            <input type="text" id="english" placeholder="Enter English Word">
-        </div>
-        <div>
-            <label for="russian">Russian:</label>
-            <input type="text" id="russian" placeholder="Enter Russian Word">
-        </div>
-        <div>
-            <label for="czech">Czech:</label>
-            <input type="text" id="czech" placeholder="Enter Czech Word">
-        </div>
+    <main class="content">
+        <section class="content__section" id="one">
+            <div class="newEntry">
+                <div>
+                    <label for="english">English:</label>
+                    <input type="text" id="english" placeholder="Enter English Word">
+                </div>
+                <div>
+                    <label for="russian">Russian:</label>
+                    <input type="text" id="russian" placeholder="Enter Russian Word">
+                </div>
+                <div>
+                    <label for="czech">Czech:</label>
+                    <input type="text" id="czech" placeholder="Enter Czech Word">
+                </div>
+            
+                <button onclick="addEntry()">Add</button>
+                <div id="result"></div>
+            </div>
+        </section>
+        <section class="content__section" id="two">
+            <h2>empty</h2>
+        </section>
+        <section class="content__section" id="three">
+            <div class="registration" id="registration">
+                <!-- <a href="" class="close" onclick="closeRegistrationForm"></a> -->
+                <input type="checkbox" id="chk" aria-hidden="true">
+        
+                <div class="signup">
+                    <div>
+                        <label for="chk" aria-hidden="true">Sign up</label>
+                        <input type="text" name="txt" id="user" placeholder="User name" required="">
+                        <input type="email" name="email" id="email" placeholder="Email" required="">
+                        <input type="password" name="pswd" id="password" placeholder="Password" required="">
+                        <button onclick="registration()">Sign up</button>
+                    </div>
+                </div>
+        
+                <div class="login">
+                    <div>
+                        <label for="chk" aria-hidden="true">Login</label>
+                        <input type="text" name="user" id="loginUser" placeholder="User" required="">
+                        <input type="password" name="pswd" id="passwordUser" placeholder="Password" required="">
+                        <button onclick="login()">Login</button>
+                    </div>
+                </div>
+            </div>     
+        </section>
+        <section class="content__section" id="four" data-default="true">
+            <h1>Hello to programm</h1>
+        </section>
+    </main>
 
-        <!-- Кнопка для выполнения запроса -->
-        <button onclick="fetchData()">Fetch Data</button>
-    <div id="result"></div>
+    <div class="loader" id="loader">
+        <img src="tube-spinner.svg"/>
+    </div>
 
     <script>
+          function enableLoader() {
+            const loader = document.getElementById('loader');
+            loader.classList.add("enable");
+            console.log('enable')
+        }
+
+        function disableLoader() {
+            const loader = document.getElementById('loader');
+            loader.classList.remove("enable");
+            console.log('disable')
+        }
+
         // Функция для выполнения fetch-запроса
-        function fetchData() {
-             // Получаем значения из input
+        function addEntry() {
+            // Получаем значения из input
             const english = document.getElementById('english').value;
             const russian = document.getElementById('russian').value;
             const czech = document.getElementById('czech').value;
+            
+            // включаем preloader, для блокировки повторных нажатий и отображения процесса запроса
+            enableLoader();
 
-              // Формируем тело запроса в виде JSON
-            const body = JSON.stringify({ english, russian, czech });
-
-            // const response = await ('http://192.168.1.35:9999/add', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Accept': 'application/json',
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: body
-            // });
-            // const json = await response.json(); 
-            // console.log(json)
-
-            // fetch('http://192.168.1.35:9999/search/trolley')
-            fetch('http://192.168.1.35:9999/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: body
-            })
-            .then(response => response.json()) // Преобразуем ответ в JSON
-            .then(data => {
-                // Показываем результат на странице
-                document.getElementById('result').innerHTML = JSON.stringify(data);
+            // Формируем тело запроса
+            const body = { english, russian, czech };
+            postData("http://192.168.1.35:9999/add", body)
+            .then((data) => {
+                // Успешный результат
+                const dataObj = JSON.stringify(data);
+                // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
+                console.log(dataObj); // строка для отладки, показывает ответ в console браузера
+                document.getElementById('result').innerHTML = JSON.stringify(dataObj);
             })
             .catch(error => {
                 // Обработка ошибок
                 console.error('Error fetching data:', error);
+            })
+            .finally(() => {
+                disableLoader();
             });
         }
 
-        // Вызываем функцию при загрузке страницы
-        // fetchData();
+        // универсальный POST метод:
+        async function postData(url = "", data = {}) {
+        // Default options are marked with *
+            const response = await fetch(url, {
+                method: "POST", // *GET, POST, PUT, DELETE, etc.
+                mode: "no-cors", // no-cors, *cors, same-origin
+                cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: "same-origin", // include, *same-origin, omit
+                headers: {
+                    "Content-Type": "application/json", // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                redirect: "follow", // manual, *follow, error
+                referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: JSON.stringify(data), // body data type must match "Content-Type" header
+            });
+            return response.json(); // parses JSON response into native JavaScript objects
+        }
+
+        function registration() {
+            const user = document.getElementById('user').value;
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            // включаем preloader, для блокировки повторных нажатий и отображения процесса запроса
+            enableLoader();
+
+            // Формируем тело запроса
+            const body = { user, password, email };
+
+            postData("http://192.168.1.35:9999/registration", body)
+            .then((data) => {
+                // Успешный результат
+                const dataObj = JSON.stringify(data);
+                // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
+                console.log(dataObj); // строка для отладки, показывает ответ в console браузера
+            })
+            .catch(error => {
+                // Обработка ошибок
+                console.error('Error fetching data:', error);
+            })
+            .finally(() => {
+                disableLoader();
+            });
+        }
+
+        function login () {
+            const user = document.getElementById('loginUser').value;
+            const password = document.getElementById('passwordUser').value;
+            // включаем preloader, для блокировки повторных нажатий и отображения процесса запроса
+            enableLoader();
+            // Формируем тело запроса в виде JSON
+            const body = { user, password};
+            postData("http://192.168.1.35:9999/authorization", body)
+            .then((data) => {
+                // Успешный результат
+                const dataObj = JSON.stringify(data);
+                // Тут ответ приходящий из сервера нужно записать в localStorage
+                localStorage.setItem('token',data.token)
+                console.log(dataObj); // строка для отладки, показывает ответ в console браузера
+            })
+            .catch(error => {
+                // Обработка ошибок
+                console.error('Error fetching data:', error);
+            })
+            .finally(() => {
+                disableLoader();
+            });
+        
+        }
     </script>
 </body>
+
 </html>

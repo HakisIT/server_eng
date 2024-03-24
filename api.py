@@ -31,7 +31,7 @@ def selection_id(word_id):
     mycursor.execute(sql_select_query, (word_id,))
     word1 = mycursor.fetchall()
     dct = {word1[0][0]:[word1[0][1], word1[0][2], word1[0][3]]}
-    return Response(str(dct), content_type='text/html; charset=utf-8')
+    return str(dct)
 
 
 def select_main():
@@ -162,29 +162,37 @@ def login(rcv_data):
     
 def add_uuid(rcv_data):
     import uuid
-    uuid_result = {'code':'200', 'token':uuid.uuid1(random.randint(10,10**12))}
+    uuid_result = str(uuid.uuid1(random.randint(10, 10 ** 12)))
+
     for key, sublist in user_info().items():
         if rcv_data['user'] in sublist:
-            sql_insert_query = """INSERT INTO user_actions (id, uuid, action) 
-                                    VALUES (%s, %s, %s)"""
-            tuple1 = (key, uuid_result, selection_id(key))
-            mycursor.execute(sql_insert_query, tuple1)
-            mydb.commit()
-    
+            sql_update1_query = 'UPDATE user_actions SET user_id="{}", uuid="{}"'.format(key, uuid_result)
+            try:
+                mycursor.execute(sql_update1_query)
+                mydb.commit()
+            except mysql.connector.IntegrityError as e:
+                print("Ошибка целостности:", e)
+                # Обработка ошибки дублирования записи здесь, если необходимо
 
-# class Main(Resource):
-#     def get(self, word_id):
-#         return selection_id(word_id)
+            sql_update2_query = 'UPDATE user_info SET uuid="{}" WHERE id={}'.format(uuid_result, key)
+            try:
+                mycursor.execute(sql_update2_query)
+                mydb.commit()
+            except mysql.connector.Error as e:
+                print("Ошибка при обновлении user_info:", e)
+                # Обработка ошибки обновления здесь, если необходимо
+
+
 
 @app.route('/search/<word>')
 def search_text(word):
     if word in selection_word():
         return {'data': 'success'}
     else:
-        return 'page not found'
+        return 'page not found, all posible id {}'.format(select_main())
     
 
-@app.route('/words/<int:word_id>')
+@app.route('/id/<int:word_id>')
 def get(word_id):
     return selection_id(word_id)
 
