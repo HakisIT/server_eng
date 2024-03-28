@@ -164,15 +164,25 @@ def add_uuid(rcv_data):
     import uuid
     uuid_result = str(uuid.uuid1(random.randint(10, 10 ** 12)))
 
+    sql_select_query = """SELECT user_id FROM user_actions"""
+    mycursor.execute(sql_select_query)
+    id_user_actions = mycursor.fetchall()
+
     for key, sublist in user_info().items():
         if rcv_data['user'] in sublist:
-            sql_update1_query = 'UPDATE user_actions SET user_id="{}", uuid="{}"'.format(key, uuid_result)
-            try:
-                mycursor.execute(sql_update1_query)
+            if key in id_user_actions:
+                mycursor.execute("UPDATE user_actions SET action = 'autorization', date = NOW() WHERE user_id = %s", (key,))
                 mydb.commit()
-            except mysql.connector.IntegrityError as e:
-                print("Ошибка целостности:", e)
-                # Обработка ошибки дублирования записи здесь, если необходимо
+            else:
+                sql_insert_query1 = """INSERT INTO user_actions (user_id, action)
+                                        VALUES (%s, %s)"""
+                tuple1 = (key, 'autorization')
+                try:
+                    mycursor.execute(sql_insert_query1, tuple1)
+                    mydb.commit()
+                except mysql.connector.IntegrityError as e:
+                    print("Ошибка целостности:", e)
+                    # Обработка ошибки дублирования записи здесь, если необходимо
 
             sql_update2_query = 'UPDATE user_info SET uuid="{}" WHERE id={}'.format(uuid_result, key)
             try:
