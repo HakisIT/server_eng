@@ -72,6 +72,12 @@ def users_list():
         users_lst.append(i[0])
     return users_lst
 
+def user_actions_list():
+    sql_select_query = """SELECT user_id FROM user_actions"""
+    mycursor.execute(sql_select_query)
+    id_user_actions = mycursor.fetchall()
+    return id_user_actions
+
 def users_and_hash_list():
     sql_select_query = "SELECT user_name, password FROM user_info"
     mycursor.execute(sql_select_query)
@@ -191,6 +197,7 @@ def add_uuid(rcv_data):
             except mysql.connector.Error as e:
                 print("Ошибка при обновлении user_info:", e)
                 # Обработка ошибки обновления здесь, если необходимо
+    return uuid_result
 
 
 
@@ -226,13 +233,16 @@ def regist():
         print('POST rcv_data', rcv_data)
 
         if add_new_user(rcv_data) == True:
-            return jsonify('Success registration !')
+            data = {'result_label':'Success authorization !'}
+            return json.dumps(data)
         
         elif add_new_user(rcv_data) == 'Fill in all the blanks':
-            return jsonify('Fill in all the blanks')
+            data = {'result_label':'Fill in all the blanks'}
+            return json.dumps(data)
         
         else:
-            return jsonify('This user already exists')
+            data = {'result_label':'This user already exists'}
+            return json.dumps(data)
             
 @app.route('/authorization', methods=['POST'])
 def autoriz():
@@ -240,17 +250,21 @@ def autoriz():
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
 
         if login(rcv_data) == True:
-            add_uuid(rcv_data)
-            return jsonify('Success authorization !')
+            token = add_uuid(rcv_data)
+            data = {'result_label':'Success authorization !', 'token': token}
+            return json.dumps(data)
         
         elif login(rcv_data) == 'Wrong password':
-            return jsonify('Wrong password')
+            data = {'result_label':'Wrong password'}
+            return json.dumps(data)
         
         elif login(rcv_data) == 'Fill in all the blanks':
-            return jsonify('Fill in all the blanks')
+            data = {'result_label':'Fill in all the blanks'}
+            return json.dumps(data)
         
         else:
-            return jsonify('This user does not exist')
+            data = {'result_label':'This user does not exist'}
+            return json.dumps(data)
 
 
 # @app.route('/<usr>')
