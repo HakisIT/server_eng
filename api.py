@@ -72,11 +72,14 @@ def users_list():
         users_lst.append(i[0])
     return users_lst
 
-def user_actions_list():
+def user_actions_id_list():
     sql_select_query = """SELECT user_id FROM user_actions"""
     mycursor.execute(sql_select_query)
     id_user_actions = mycursor.fetchall()
-    return id_user_actions
+    id_list = []
+    for i in id_user_actions:
+        id_list.append(i[0])
+    return id_list
 
 def users_and_hash_list():
     sql_select_query = "SELECT user_name, password FROM user_info"
@@ -166,7 +169,46 @@ def login(rcv_data):
     else:
         return False
     
+
 def add_uuid(rcv_data):
+    import uuid
+    uuid_result = str(uuid.uuid1(random.randint(10, 10 ** 12)))
+
+    for key, sublist in user_info().items():
+        if rcv_data['user'] in sublist:
+            if key in user_actions_id_list():
+                mycursor.execute("UPDATE user_actions SET action = 'autorization', date = NOW() WHERE user_id = %s", (key,))
+                mydb.commit()
+                mycursor.execute("INSERT INTO user_info (uuid) VALUES (%s)", (uuid_result,))
+                mydb.commit()
+            else:
+                sql_insert_query1 = """INSERT INTO user_actions (user_id, action)
+                                        VALUES (%s, %s)"""
+                tuple2 = (key, 'autorization')
+                try:
+                    mycursor.execute(sql_insert_query1, tuple2)
+                    mydb.commit()
+                except mysql.connector.IntegrityError as e:
+                    print("Ошибка целостности:", e)
+                    # Обработка ошибки дублирования записи здесь, если необходимо
+    # for key, sublist in user_info().items():
+    #     if rcv_data['user'] in sublist:
+    #         if key == int(list(rcv_data.keys())[0]):
+    #             mycursor.execute("UPDATE user_actions SET action = 'autorization', date = NOW() WHERE user_id = %s", (key,))
+    #             mydb.commit()
+    #         else:
+    #             sql_insert_query1 = """INSERT INTO user_actions (user_id, action)
+    #                                     VALUES (%s, %s)"""
+    #             tuple1 = (key, 'autorization')
+    #             try:
+    #                 mycursor.execute(sql_insert_query1, tuple1)
+    #                 mydb.commit()
+    #             except mysql.connector.IntegrityError as e:
+    #                 print("Ошибка целостности:", e)
+    return uuid_result
+    
+
+def add_uuid2(rcv_data):
     import uuid
     uuid_result = str(uuid.uuid1(random.randint(10, 10 ** 12)))
 
