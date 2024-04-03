@@ -137,6 +137,12 @@ def user_verification(user, password):
             return False
 
 
+def create_uuid():
+    import uuid
+    uuid_result = str(uuid.uuid1(random.randint(10, 10 ** 12)))
+    return uuid_result
+
+
 def hash_password(data):
     data_json = json.dumps(data)
     return hashlib.sha256(data_json.encode('utf-8')).hexdigest()
@@ -145,9 +151,9 @@ def hash_password(data):
 def add_new_user(rcv_data):
     if hash_password(rcv_data) != '' and validate_registration(rcv_data) == True and rcv_data['user'] not in users_list():
         hash_pass = hash_password(rcv_data['password'])
-        sql_insert_query = """INSERT INTO user_info (user_name, password, email) 
-                                    VALUES (%s, %s, %s)"""
-        tuple1 = (rcv_data['user'], hash_pass, rcv_data['email'])
+        sql_insert_query = """INSERT INTO user_info (user_name, password, email, uuid) 
+                                    VALUES (%s, %s, %s, %s)"""
+        tuple1 = (rcv_data['user'], hash_pass, rcv_data['email'], create_uuid())
         mycursor.execute(sql_insert_query, tuple1)
         mydb.commit()
         return True
@@ -171,15 +177,12 @@ def login(rcv_data):
     
 
 def add_uuid(rcv_data):
-    import uuid
-    uuid_result = str(uuid.uuid1(random.randint(10, 10 ** 12)))
-
     for key, sublist in user_info().items():
         if rcv_data['user'] in sublist:
             if key in user_actions_id_list():
                 mycursor.execute("UPDATE user_actions SET action = 'autorization', date = NOW() WHERE user_id = %s", (key,))
                 mydb.commit()
-                mycursor.execute("INSERT INTO user_info (uuid) VALUES (%s)", (uuid_result,))
+                mycursor.execute("UPDATE user_info SET uuid = %s WHERE id = %s", (create_uuid(), key,))
                 mydb.commit()
             else:
                 sql_insert_query1 = """INSERT INTO user_actions (user_id, action)
@@ -205,43 +208,8 @@ def add_uuid(rcv_data):
     #                 mydb.commit()
     #             except mysql.connector.IntegrityError as e:
     #                 print("Ошибка целостности:", e)
-    return uuid_result
+    return create_uuid()
     
-
-def add_uuid2(rcv_data):
-    import uuid
-    uuid_result = str(uuid.uuid1(random.randint(10, 10 ** 12)))
-
-    sql_select_query = """SELECT user_id FROM user_actions"""
-    mycursor.execute(sql_select_query)
-    id_user_actions = mycursor.fetchall()
-
-    for key, sublist in user_info().items():
-        if rcv_data['user'] in sublist:
-            if key in id_user_actions:
-                mycursor.execute("UPDATE user_actions SET action = 'autorization', date = NOW() WHERE user_id = %s", (key,))
-                mydb.commit()
-            else:
-                sql_insert_query1 = """INSERT INTO user_actions (user_id, action)
-                                        VALUES (%s, %s)"""
-                tuple1 = (key, 'autorization')
-                try:
-                    mycursor.execute(sql_insert_query1, tuple1)
-                    mydb.commit()
-                except mysql.connector.IntegrityError as e:
-                    print("Ошибка целостности:", e)
-                    # Обработка ошибки дублирования записи здесь, если необходимо
-
-            sql_update2_query = 'UPDATE user_info SET uuid="{}" WHERE id={}'.format(uuid_result, key)
-            try:
-                mycursor.execute(sql_update2_query)
-                mydb.commit()
-            except mysql.connector.Error as e:
-                print("Ошибка при обновлении user_info:", e)
-                # Обработка ошибки обновления здесь, если необходимо
-    return uuid_result
-
-
 
 @app.route('/search/<word>')
 def search_text(word):
