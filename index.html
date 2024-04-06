@@ -93,12 +93,13 @@
             const english = document.getElementById('english').value;
             const russian = document.getElementById('russian').value;
             const czech = document.getElementById('czech').value;
+            const token = localStorage.getItem('token')
             
             // включаем preloader, для блокировки повторных нажатий и отображения процесса запроса
             enableLoader();
 
             // Формируем тело запроса
-            const body = { english, russian, czech };
+            const body = { english, russian, czech, token };
             postData("http://192.168.1.35:9999/add", body)
             .then((data) => {
                 // Успешный результат

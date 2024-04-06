@@ -106,14 +106,28 @@ def add_new_word(rcv_data):
     print('rcv_data', rcv_data)
 
     if validate_word(rcv_data) == True:
-        sql_insert_query = """INSERT INTO main (english, russian, chech) 
+        sql_insert_query = """INSERT INTO main (english, russian, czech) 
                                     VALUES (%s, %s, %s)"""
         tuple1 = (rcv_data['english'], rcv_data['russian'], rcv_data['czech'])
         mycursor.execute(sql_insert_query, tuple1)
         mydb.commit()
+        eng_word = rcv_data['english']
+        for key, sublist in user_info().items():
+            if rcv_data['user'] in sublist:
+                if key in user_actions_id_list():
+                    mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {eng_word}', key))
+                    mydb.commit()
         return True
     else:
         return False
+    
+
+def validate_key(rcv_data):
+    for key, sublist in user_info().items():
+            if rcv_data['user'] in sublist:
+                if key in user_actions_id_list():
+                    mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {eng_word}', key))
+                    mydb.commit()
     
 
 def validate_registration(data):    
@@ -180,7 +194,7 @@ def add_uuid(rcv_data):
     for key, sublist in user_info().items():
         if rcv_data['user'] in sublist:
             if key in user_actions_id_list():
-                mycursor.execute("UPDATE user_actions SET action = 'autorization', date = NOW() WHERE user_id = %s", (key,))
+                mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", ('authorization', key))
                 mydb.commit()
                 mycursor.execute("UPDATE user_info SET uuid = %s WHERE id = %s", (create_uuid(), key,))
                 mydb.commit()
@@ -194,20 +208,6 @@ def add_uuid(rcv_data):
                 except mysql.connector.IntegrityError as e:
                     print("Ошибка целостности:", e)
                     # Обработка ошибки дублирования записи здесь, если необходимо
-    # for key, sublist in user_info().items():
-    #     if rcv_data['user'] in sublist:
-    #         if key == int(list(rcv_data.keys())[0]):
-    #             mycursor.execute("UPDATE user_actions SET action = 'autorization', date = NOW() WHERE user_id = %s", (key,))
-    #             mydb.commit()
-    #         else:
-    #             sql_insert_query1 = """INSERT INTO user_actions (user_id, action)
-    #                                     VALUES (%s, %s)"""
-    #             tuple1 = (key, 'autorization')
-    #             try:
-    #                 mycursor.execute(sql_insert_query1, tuple1)
-    #                 mydb.commit()
-    #             except mysql.connector.IntegrityError as e:
-    #                 print("Ошибка целостности:", e)
     return create_uuid()
     
 
