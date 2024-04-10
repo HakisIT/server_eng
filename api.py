@@ -81,6 +81,23 @@ def user_actions_id_list():
         id_list.append(i[0])
     return id_list
 
+def lst_main_words():
+    sql_select_query = """SELECT english, russian, czech FROM main"""
+    mycursor.execute(sql_select_query)
+    words = mycursor.fetchall()
+    words_list = []
+    for i in words:
+        words_list.append(i[0])
+        words_list.append(i[1])
+        words_list.append(i[2])
+    return words_list
+
+def token_chech(rcv_data):
+    for key, sublist in user_info().items():
+        if rcv_data['token'] in sublist:
+            return key
+    return False
+        
 def users_and_hash_list():
     sql_select_query = "SELECT user_name, password FROM user_info"
     mycursor.execute(sql_select_query)
@@ -99,24 +116,25 @@ def validate_word(data):
     if data['english'] == '' or data['russian'] == '' or data['czech'] == '':
         print('empty validate')
         return False
+    
+    if data['english'] in lst_main_words() or data['russian'] in lst_main_words() or data['czech'] in lst_main_words():
+        print('existing word')
+        return False
     return True
 
 
 def add_new_word(rcv_data):
-    print('rcv_data', rcv_data)
-
-    if validate_word(rcv_data) == True:
+    print('rcv_data:', rcv_data)
+    if validate_word(rcv_data) == True and token_chech(rcv_data) != False:
         sql_insert_query = """INSERT INTO main (english, russian, czech) 
                                     VALUES (%s, %s, %s)"""
         tuple1 = (rcv_data['english'], rcv_data['russian'], rcv_data['czech'])
         mycursor.execute(sql_insert_query, tuple1)
         mydb.commit()
-        eng_word = rcv_data['english']
-        for key, sublist in user_info().items():
-            if rcv_data['user'] in sublist:
-                if key in user_actions_id_list():
-                    mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {eng_word}', key))
-                    mydb.commit()
+        correct_user_id = token_chech(rcv_data)
+        eng_word = selection_id(correct_user_id)[0]
+        mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {eng_word}', correct_user_id))
+        mydb.commit()
         return True
     else:
         return False
@@ -163,6 +181,7 @@ def hash_password(data):
 
 
 def add_new_user(rcv_data):
+    print('add_new_user')
     if hash_password(rcv_data) != '' and validate_registration(rcv_data) == True and rcv_data['user'] not in users_list():
         hash_pass = hash_password(rcv_data['password'])
         sql_insert_query = """INSERT INTO user_info (user_name, password, email, uuid) 
@@ -196,7 +215,9 @@ def add_uuid(rcv_data):
             if key in user_actions_id_list():
                 mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", ('authorization', key))
                 mydb.commit()
-                mycursor.execute("UPDATE user_info SET uuid = %s WHERE id = %s", (create_uuid(), key,))
+                print('add_uuid')
+                uuid = create_uuid()
+                mycursor.execute("UPDATE user_info SET uuid = %s WHERE id = %s", (uuid, key,))
                 mydb.commit()
             else:
                 sql_insert_query1 = """INSERT INTO user_actions (user_id, action)
@@ -208,7 +229,7 @@ def add_uuid(rcv_data):
                 except mysql.connector.IntegrityError as e:
                     print("Ошибка целостности:", e)
                     # Обработка ошибки дублирования записи здесь, если необходимо
-    return create_uuid()
+    return uuid
     
 
 @app.route('/search/<word>')
@@ -262,6 +283,7 @@ def autoriz():
         if login(rcv_data) == True:
             token = add_uuid(rcv_data)
             data = {'result_label':'Success authorization !', 'token': token}
+            print(data)
             return json.dumps(data)
         
         elif login(rcv_data) == 'Wrong password':
