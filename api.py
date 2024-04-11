@@ -131,9 +131,14 @@ def add_new_word(rcv_data):
         tuple1 = (rcv_data['english'], rcv_data['russian'], rcv_data['czech'])
         mycursor.execute(sql_insert_query, tuple1)
         mydb.commit()
+
+        sql_select_query = """SELECT id FROM main WHERE english = %s AND russian = %s AND czech = %s"""
+        mycursor.execute(sql_select_query, (rcv_data['english'], rcv_data['russian'], rcv_data['czech']))
+        words_id = mycursor.fetchall()
+        mydb.commit()
+
         correct_user_id = token_chech(rcv_data)
-        eng_word = selection_id(correct_user_id)[0]
-        mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {eng_word}', correct_user_id))
+        mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {words_id[0][0]}', correct_user_id))
         mydb.commit()
         return True
     else:
