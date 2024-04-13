@@ -193,3 +193,62 @@
         right: 0;
     }
 }
+
+.word_translate {
+    border: 3px solid #0d3988a8;
+    border-radius: 15px;
+    min-width: 400px;
+    height: 320px;
+    align-content: center;
+}
+.word_translate > .label {
+    width: 100%;
+    text-align: center;
+    margin: 0 0 40px;
+    font-size: 30px;
+}
+.word_translate .buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.word_translate .tooltip {
+    position: relative;
+    display: inline-block;
+}
+.word_translate .tooltip .tooltip_text {
+    visibility: hidden;
+    width: 82px;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: -25px;
+    left: 0;
+}
+.word_translate .tooltip:hover .tooltip_text {
+    visibility: visible;
+}
+
+.word_translate .button_next {
+    text-align: center;
+    margin-top: 40px;
+}
+.word_translate .button_next > button > img {
+    width: 50px;
+}
+.word_translate .button_next .tooltip .tooltip_text {
+    width: 62px;
+}
+
+.word_translate .buttons > button {
+    padding: 4px;
+}
+.word_translate .buttons > button > img {
+    width: 75px;
+    height: 50px;
+    object-fit: cover;
+}
+

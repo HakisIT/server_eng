@@ -38,7 +38,29 @@
             </div>
         </section>
         <section class="content__section" id="two">
-            <h2>empty</h2>
+            <div class="word_translate">
+                <div class="label" id="label-translate">TEXT</div>
+                <div class="buttons">
+                    <button class="tooltip" onclick="translateTo('rus')">
+                        <img src="img/rus.png" alt=""/>
+                        <span class="tooltip_text">RUSSIAN</span>
+                    </button>
+                    <button class="tooltip" onclick="translateTo('eng')">
+                        <img src="img/eng.png" alt=""/>
+                        <span class="tooltip_text">ENGLISH</span>
+                    </button>
+                    <button class="tooltip" onclick="translateTo('cz')">
+                        <img src="img/czech.png" alt=""/>
+                        <span class="tooltip_text">CZECH</span>
+                    </button>
+                </div>
+                <div class="button_next">
+                    <button class="tooltip" onclick="next()">
+                        <img src="img/arrow.png" alt=""/>
+                        <span class="tooltip_text">NEXT</span>
+                    </button>
+                </div>
+            </div>
         </section>
         <section class="content__section" id="three">
             <div class="registration" id="registration">
@@ -151,6 +173,49 @@
             // .finally(() => {
             //     disableLoader();
             // });
+        }
+
+        function translateTo(lang) {
+            enableLoader();
+            const body = {lang: lang};
+
+            postData("http://192.168.1.35:9999/translate", body)
+                .then((response) => {
+                    // Успешный результат
+                    const dataObj = response;
+                    document.getElementById('label-translate').innerHTML = response.data;
+                    // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
+                    console.log(dataObj); // строка для отладки, показывает ответ в console браузера
+                })
+                .catch(error => {
+                    // Обработка ошибок
+                    console.error('Error fetching data:', error);
+                })
+                .finally(() => {
+                    disableLoader();
+                });
+        }
+
+        function next() {
+            enableLoader();
+            const body = {};
+
+            postData("http://192.168.1.35:9999/next", body)
+                .then((data) => {
+                    // Успешный результат
+                    const dataObj = JSON.stringify(data);
+                    document.getElementById('label-translate').innerHTML = dataObj;
+                    // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
+                    console.log(dataObj); // строка для отладки, показывает ответ в console браузера
+                })
+                .catch(error => {
+                    // Обработка ошибок
+                    console.error('Error fetching data:', error);
+                })
+                .finally(() => {
+                    disableLoader();
+                });
+
         }
 
         function login () {

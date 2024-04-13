@@ -31,7 +31,7 @@ def selection_id(word_id):
     mycursor.execute(sql_select_query, (word_id,))
     word1 = mycursor.fetchall()
     dct = {word1[0][0]:[word1[0][1], word1[0][2], word1[0][3]]}
-    return str(dct)
+    return dct
 
 
 def select_main():
@@ -147,10 +147,10 @@ def add_new_word(rcv_data):
 
 def validate_key(rcv_data):
     for key, sublist in user_info().items():
-            if rcv_data['user'] in sublist:
-                if key in user_actions_id_list():
-                    mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {eng_word}', key))
-                    mydb.commit()
+        if rcv_data['user'] in sublist:
+            if key in user_actions_id_list():
+                mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {eng_word}', key))
+                mydb.commit()
     
 
 def validate_registration(data):    
@@ -235,6 +235,17 @@ def add_uuid(rcv_data):
                     print("Ошибка целостности:", e)
                     # Обработка ошибки дублирования записи здесь, если необходимо
     return uuid
+
+def flash_card_translate(rcv_data, rnd_word):
+    if rcv_data['lang'] == 'eng':
+        return list(rnd_word.values())[0][0]
+    
+    if rcv_data['lang'] == 'rus':
+        return list(rnd_word.values())[0][1]
+    
+    if rcv_data['lang'] == 'cz':
+        return list(rnd_word.values())[0][2]
+    
     
 
 @app.route('/search/<word>')
@@ -260,6 +271,26 @@ def process_data():
                 return jsonify({'data': 'success'})
             else:
                 return jsonify({'data': {'success': 'fail'}})
+            
+
+@app.route('/translate', methods=['POST'])
+def flash_card():
+    if request.method=='POST':
+        if request.data:
+            rcv_data = json.loads(request.data.decode(encoding='utf-8'))
+            random_word = random_id()
+            resp = flash_card_translate(rcv_data, random_word)
+            result = jsonify({'data': resp})
+            return result
+        
+
+@app.route('/next', methods=['POST'])
+def next_word():
+    if request.method=='POST':
+        if request.data:
+            res = list(random_id().values())[0][0]
+            return jsonify({'data': res})
+            
             
 
 @app.route('/registration', methods=['POST'])
