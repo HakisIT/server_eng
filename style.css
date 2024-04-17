@@ -252,3 +252,13 @@
     object-fit: cover;
 }
 
+.notification {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    text-align: center;
+    margin: 40px;
+    color: #a31919e6;
+    font-size: 25px;
+    font-weight: 700;
+}

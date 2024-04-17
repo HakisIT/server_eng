@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fetch Example</title>
+    <title>TRANSLATOR</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 
@@ -96,8 +96,12 @@
         <img src="tube-spinner.svg"/>
     </div>
 
+    <div class="notification" id="notification"></div>
+
     <script>
-          function enableLoader() {
+        let words = '';
+
+        function enableLoader() {
             const loader = document.getElementById('loader');
             loader.classList.add("enable");
             console.log('enable')
@@ -160,9 +164,15 @@
 
             postData("http://192.168.1.35:9999/registration", body)
             .then(res => {
-
+                document.getElementById('notification').innerHTML = res.result_label;
+                setTimeout(() => {
+                    document.getElementById('notification').innerHTML = '';
+                }, 2000);
                 console.log(res); // строка для отладки, показывает ответ в console браузера
             })
+            .finally(() => {
+                disableLoader();
+            });
                // Успешный результат
                 // const dataObj = JSON.stringify(data);
                 // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
@@ -176,24 +186,36 @@
         }
 
         function translateTo(lang) {
-            enableLoader();
-            const body = {lang: lang};
+            if (!words) {
+                return;
+            }
+            if (lang === 'eng') {
+                document.getElementById('label-translate').innerHTML = words[0]; 
+            }
+            if (lang === 'rus') {
+                document.getElementById('label-translate').innerHTML = words[1]; 
+            }
+            if (lang === 'cz') {
+                document.getElementById('label-translate').innerHTML = words[2]; 
+            }
+            // enableLoader();
+            // const body = {lang: lang};
 
-            postData("http://192.168.1.35:9999/translate", body)
-                .then((response) => {
-                    // Успешный результат
-                    const dataObj = response;
-                    document.getElementById('label-translate').innerHTML = response.data;
-                    // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
-                    console.log(dataObj); // строка для отладки, показывает ответ в console браузера
-                })
-                .catch(error => {
-                    // Обработка ошибок
-                    console.error('Error fetching data:', error);
-                })
-                .finally(() => {
-                    disableLoader();
-                });
+            // postData("http://192.168.1.35:9999/translate", body)
+            //     .then((response) => {
+            //         // Успешный результат
+            //         const dataObj = response;
+            //         document.getElementById('label-translate').innerHTML = response.data;
+            //         // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
+            //         console.log(dataObj); // строка для отладки, показывает ответ в console браузера
+            //     })
+            //     .catch(error => {
+            //         // Обработка ошибок
+            //         console.error('Error fetching data:', error);
+            //     })
+            //     .finally(() => {
+            //         disableLoader();
+            //     });
         }
 
         function next() {
@@ -201,12 +223,12 @@
             const body = {};
 
             postData("http://192.168.1.35:9999/next", body)
-                .then((data) => {
+                .then((response) => {
                     // Успешный результат
-                    const dataObj = JSON.stringify(data);
-                    document.getElementById('label-translate').innerHTML = dataObj;
+                    document.getElementById('label-translate').innerHTML = response.data[0];
+                    words = response.data;
                     // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
-                    console.log(dataObj); // строка для отладки, показывает ответ в console браузера
+                    // console.log(dataObj); // строка для отладки, показывает ответ в console браузера
                 })
                 .catch(error => {
                     // Обработка ошибок
@@ -232,6 +254,10 @@
                 // Тут ответ приходящий из сервера нужно записать в localStorage
                 localStorage.setItem('token',response.token)
                 // console.log(data); // строка для отладки, показывает ответ в console браузера
+                document.getElementById('notification').innerHTML = response.result_label;
+                setTimeout(() => {
+                    document.getElementById('notification').innerHTML = '';
+                }, 2000);
             })
             .catch(error => {
                 // Обработка ошибок

@@ -238,13 +238,13 @@ def add_uuid(rcv_data):
 
 def flash_card_translate(rcv_data, rnd_word):
     if rcv_data['lang'] == 'eng':
-        return list(rnd_word.values())[0][0]
+        return rnd_word[0]
     
     if rcv_data['lang'] == 'rus':
-        return list(rnd_word.values())[0][1]
+        return rnd_word[1]
     
     if rcv_data['lang'] == 'cz':
-        return list(rnd_word.values())[0][2]
+        return rnd_word[2]
     
     
 
@@ -272,24 +272,35 @@ def process_data():
             else:
                 return jsonify({'data': {'success': 'fail'}})
             
+# Глобальная переменная для хранения случайного слова
+cached_random_word = None
+
+def random_words():
+    global cached_random_word
+    cached_random_word = list(random_id().values())[0]
+    return cached_random_word
 
 @app.route('/translate', methods=['POST'])
 def flash_card():
-    if request.method=='POST':
+    if request.method == 'POST':
         if request.data:
             rcv_data = json.loads(request.data.decode(encoding='utf-8'))
-            random_word = random_id()
-            resp = flash_card_translate(rcv_data, random_word)
+            word = random_words()  # Получаем случайное слово
+            resp = flash_card_translate(rcv_data, word)
+            # После использования обновляем кэшированное слово
+            cached_random_word = None
             result = jsonify({'data': resp})
             return result
-        
 
 @app.route('/next', methods=['POST'])
 def next_word():
-    if request.method=='POST':
+    if request.method == 'POST':
         if request.data:
-            res = list(random_id().values())[0][0]
-            return jsonify({'data': res})
+            word = random_words()  # Получаем случайное слово
+            # После использования обновляем кэшированное слово
+            cached_random_word = None
+            return jsonify({'data': word})        
+
             
             
 
