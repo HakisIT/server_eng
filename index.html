@@ -12,8 +12,9 @@
     <nav class="navigation">
         <ul class="navigation__list">
             <li class="navigation__item"><a class="navigation__link" href="#one">Add</a></li>
-            <li class="navigation__item"><a class="navigation__link" href="#two">Empty</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#two">Flashcards</a></li>
             <li class="navigation__item"><a class="navigation__link" href="#three">Registration</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#four">Statistics</a></li>
         </ul>
     </nav>
 
@@ -88,7 +89,12 @@
             </div>     
         </section>
         <section class="content__section" id="four" data-default="true">
-            <h1>Hello to programm</h1>
+            <h1>session statistics</h1> <button onclick="statistic()">Update</button>
+            <div>Пройдено слов: <label id="statistic_pass">0</label></div>
+            <div>Добавлено слов: 
+                <div id="statistic_add">1</div>
+            </div>
+
         </section>
     </main>
 
@@ -267,6 +273,40 @@
                 disableLoader();
             });
         
+        }
+
+        function statistic() {
+            enableLoader();
+
+            const token = localStorage.getItem('token');
+            const body = {token};
+            
+            postData("http://192.168.1.35:9999/statistic", body)
+            .then((response) => {
+                
+                // console.log(data); // строка для отладки, показывает ответ в console браузера
+                document.getElementById('statistic_pass').innerHTML = response.pass_words; // число
+
+                const response_html = response.add_words.map(item => `<div>${item}</div>`).join('');
+                document.getElementById('statistic_add').innerHTML = response_html; // массив
+            })
+            .catch(error => {
+                // Обработка ошибок
+                console.error('Error fetching data:', error);
+                // update with mock
+                const mock = {
+                    pass_words: 5,
+                    add_words: ['add', 'new', 'hello']
+                };
+
+                const mock_html = mock.add_words.map(item => `<div>${item}</div>`).join('');
+
+                document.getElementById('statistic_pass').innerHTML = mock.pass_words; // число
+                document.getElementById('statistic_add').innerHTML = mock_html; // массив
+            })
+            .finally(() => {
+                disableLoader();
+            });
         }
     </script>
 </body>

@@ -138,9 +138,11 @@ def add_new_word(rcv_data):
         mydb.commit()
 
         correct_user_id = token_chech(rcv_data)
-        mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {words_id[0][0]}', correct_user_id))
+        mycursor.execute("INSERT INTO user_actions (action, date, user_id, add_id) VALUES (%s, NOW(), %s, %s)", ('add', correct_user_id, words_id[0][0]))
         mydb.commit()
         return True
+    elif validate_word(rcv_data) == True and token_chech(rcv_data) != True:
+        return {'autorization':'fail'}
     else:
         return False
     
@@ -269,8 +271,10 @@ def process_data():
 
             if add_new_word(rcv_data) == True:
                 return jsonify({'data': 'success'})
+            elif add_new_word(rcv_data) == {'autorization':'fail'}:
+                return jsonify({'data':'autorization before add new words'})
             else:
-                return jsonify({'data': {'success': 'fail'}})
+                return jsonify({'data': 'strings must not contain numbers and cannot be empty'})
             
 # Глобальная переменная для хранения случайного слова
 cached_random_word = None
@@ -287,8 +291,6 @@ def flash_card():
             rcv_data = json.loads(request.data.decode(encoding='utf-8'))
             word = random_words()  # Получаем случайное слово
             resp = flash_card_translate(rcv_data, word)
-            # После использования обновляем кэшированное слово
-            cached_random_word = None
             result = jsonify({'data': resp})
             return result
 
@@ -344,6 +346,8 @@ def autoriz():
         else:
             data = {'result_label':'This user does not exist'}
             return json.dumps(data)
+
+@app.route('/statistics')
 
 
 # @app.route('/<usr>')
