@@ -151,7 +151,7 @@ def validate_key(rcv_data):
     for key, sublist in user_info().items():
         if rcv_data['user'] in sublist:
             if key in user_actions_id_list():
-                mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add {eng_word}', key))
+                mycursor.execute("INSERT INTO user_actions (action, date, user_id) VALUES (%s, NOW(), %s)", (f'add', key))
                 mydb.commit()
     
 
@@ -290,17 +290,25 @@ def flash_card():
         if request.data:
             rcv_data = json.loads(request.data.decode(encoding='utf-8'))
             word = random_words()  # Получаем случайное слово
-            resp = flash_card_translate(rcv_data, word)
+            resp = flash_card_translate(rcv_data, word) 
             result = jsonify({'data': resp})
             return result
 
+passed_word_count = 0
 @app.route('/next', methods=['POST'])
 def next_word():
+    global passed_word_count
     if request.method == 'POST':
         if request.data:
             word = random_words()  # Получаем случайное слово
             # После использования обновляем кэшированное слово
-            cached_random_word = None
+            passed_word_count += 1
+            mycursor.execute("SELECT passed_word_count, id FROM user_info")            
+            fetch = mycursor.fetchall()
+            print(fetch)
+            # plus_one = fetch[4][0]+1
+            # mycursor.execute("UPDATE user_info SET passed_word_count = %s")            
+            # fetch = mycursor.fetchall()
             return jsonify({'data': word})        
 
             
@@ -328,7 +336,7 @@ def regist():
 def autoriz():
     if request.data:
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
-
+        print(request.data)
         if login(rcv_data) == True:
             token = add_uuid(rcv_data)
             data = {'result_label':'Success authorization !', 'token': token}
@@ -347,7 +355,24 @@ def autoriz():
             data = {'result_label':'This user does not exist'}
             return json.dumps(data)
 
-@app.route('/statistics')
+@app.route('/statistic', methods=['POST'])
+def statist():
+    if request.data:
+        rcv_data = json.loads(request.data.decode(encoding='utf-8'))
+        token = rcv_data['token']
+        sql_select_query = """
+        SELECT user_id, action, add_id, uuid, english, russian, czech
+        FROM user_actions 
+        INNER JOIN user_info ON user_actions.user_id = user_info.id
+        INNER JOIN main ON user_actions.add_id = main.id
+        WHERE action = 'add' AND uuid = %s"""
+        mycursor.execute(sql_select_query, (token, ))
+        fetch = mycursor.fetchall()
+        eng_words_list = []
+        print(passed_word_count)
+        for i in fetch:
+            eng_words_list.append(i[4])
+        return {'pass_words': passed_word_count, 'add_words':eng_words_list}
 
 
 # @app.route('/<usr>')
