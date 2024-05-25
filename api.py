@@ -30,7 +30,7 @@ def selection_id(word_id):
     sql_select_query = """SELECT * FROM main WHERE id = %s"""
     mycursor.execute(sql_select_query, (word_id,))
     word1 = mycursor.fetchall()
-    dct = {word1[0][0]:[word1[0][1], word1[0][2], word1[0][3]]}
+    dct = {word1[0][0]:[word1[0][1], word1[0][2], word1[0][3], word1[0][4]]}
     return dct
 
 
@@ -82,7 +82,7 @@ def user_actions_id_list():
     return id_list
 
 def lst_main_words():
-    sql_select_query = """SELECT english, russian, czech FROM main"""
+    sql_select_query = """SELECT english, russian, czech, german FROM main"""
     mycursor.execute(sql_select_query)
     words = mycursor.fetchall()
     words_list = []
@@ -90,6 +90,8 @@ def lst_main_words():
         words_list.append(i[0])
         words_list.append(i[1])
         words_list.append(i[2])
+        words_list.append(i[3])
+        print(i[3])
     return words_list
 
 def token_chech(rcv_data):
@@ -109,15 +111,15 @@ def users_and_hash_list():
 
 def validate_word(data):
     # check is digit in data
-    if any(char.isdigit() for char in data['english']) or any(char.isdigit() for char in data['russian']) or any(char.isdigit() for char in data['czech']):
+    if any(char.isdigit() for char in data['english']) or any(char.isdigit() for char in data['russian']) or any(char.isdigit() for char in data['czech'] or any(char.isdigit() for char in data['german'])):
         print('number validate')
         return False
 
-    if data['english'] == '' or data['russian'] == '' or data['czech'] == '':
+    if data['english'] == '' or data['russian'] == '' or data['czech'] == '' or data['german'] == '':
         print('empty validate')
         return False
     
-    if data['english'] in lst_main_words() or data['russian'] in lst_main_words() or data['czech'] in lst_main_words():
+    if data['english'] in lst_main_words() or data['russian'] in lst_main_words() or data['czech'] in lst_main_words() or data['german'] in lst_main_words():
         print('existing word')
         return False
     return True
@@ -126,14 +128,14 @@ def validate_word(data):
 def add_new_word(rcv_data):
     print('rcv_data:', rcv_data)
     if validate_word(rcv_data) == True and token_chech(rcv_data) != False:
-        sql_insert_query = """INSERT INTO main (english, russian, czech) 
-                                    VALUES (%s, %s, %s)"""
-        tuple1 = (rcv_data['english'], rcv_data['russian'], rcv_data['czech'])
+        sql_insert_query = """INSERT INTO main (english, russian, czech, german) 
+                                    VALUES (%s, %s, %s, %s)"""
+        tuple1 = (rcv_data['english'], rcv_data['russian'], rcv_data['czech'], rcv_data['german'])
         mycursor.execute(sql_insert_query, tuple1)
         mydb.commit()
 
-        sql_select_query = """SELECT id FROM main WHERE english = %s AND russian = %s AND czech = %s"""
-        mycursor.execute(sql_select_query, (rcv_data['english'], rcv_data['russian'], rcv_data['czech']))
+        sql_select_query = """SELECT id FROM main WHERE english = %s AND russian = %s AND czech = %s AND german = %s"""
+        mycursor.execute(sql_select_query, (rcv_data['english'], rcv_data['russian'], rcv_data['czech'], rcv_data['german']))
         words_id = mycursor.fetchall()
         mydb.commit()
 
@@ -248,6 +250,10 @@ def flash_card_translate(rcv_data, rnd_word):
     if rcv_data['lang'] == 'cz':
         return rnd_word[2]
     
+    if rcv_data['lang'] == 'ger':
+        print(rcv_data['lang'])
+        return rnd_word[3]
+    
     
 
 @app.route('/search/<word>')
@@ -275,14 +281,11 @@ def process_data():
                 return jsonify({'data':'autorization before add new words'})
             else:
                 return jsonify({'data': 'strings must not contain numbers and cannot be empty'})
-            
-# Глобальная переменная для хранения случайного слова
-cached_random_word = None
+        
 
 def random_words():
-    global cached_random_word
-    cached_random_word = list(random_id().values())[0]
-    return cached_random_word
+    random_word = list(random_id().values())[0]
+    return random_word
 
 @app.route('/translate', methods=['POST'])
 def flash_card():
@@ -290,7 +293,8 @@ def flash_card():
         if request.data:
             rcv_data = json.loads(request.data.decode(encoding='utf-8'))
             word = random_words()  # Получаем случайное слово
-            resp = flash_card_translate(rcv_data, word) 
+            print(word)
+            resp = flash_card_translate(rcv_data, word)
             result = jsonify({'data': resp})
             return result
 
@@ -298,26 +302,31 @@ passed_word_count = 0
 @app.route('/next', methods=['POST'])
 def next_word():
     global passed_word_count
-    if request.method == 'POST':
-        if request.data:
-            word = random_words()  # Получаем случайное слово
-            # После использования обновляем кэшированное слово
-            passed_word_count += 1
-            mycursor.execute("SELECT passed_word_count, id FROM user_info")            
-            fetch = mycursor.fetchall()
-            print(fetch)
-            # plus_one = fetch[4][0]+1
-            # mycursor.execute("UPDATE user_info SET passed_word_count = %s")            
-            # fetch = mycursor.fetchall()
-            return jsonify({'data': word})        
+    if request.data:
+        # rcv_data = json.loads(request.data.decode(encoding='utf-8'))
+        # token = rcv_data['token']
+        # print(token)
+        word = random_words()  # Получаем случайное слово
+        passed_word_count += 1
+        mycursor.execute("SELECT passed_word_count, id FROM user_info")          
+        select = mycursor.fetchall()
+        # print(select)
+        # mycursor.execute("UPDATE user_info SET passed_word_count = %s WHERE id = %s", (select[0], select[1],))            
+        # update = mycursor.fetchall()
+        # plus_one = fetch[4][0]+1
+        # mycursor.execute("UPDATE user_info SET passed_word_count = %s")            
+        # fetch = mycursor.fetchall()
+        return jsonify({'data': word})        
 
             
             
 
 @app.route('/registration', methods=['POST'])
 def regist():
+    global passed_word_count
     if request.data:
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
+        passed_word_count = 0
         print('POST rcv_data', rcv_data)
 
         if add_new_user(rcv_data) == True:
@@ -334,11 +343,14 @@ def regist():
             
 @app.route('/authorization', methods=['POST'])
 def autoriz():
+    global passed_word_count
     if request.data:
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
         print(request.data)
+        passed_word_count = 0
         if login(rcv_data) == True:
             token = add_uuid(rcv_data)
+            
             data = {'result_label':'Success authorization !', 'token': token}
             print(data)
             return json.dumps(data)
@@ -361,7 +373,7 @@ def statist():
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
         token = rcv_data['token']
         sql_select_query = """
-        SELECT user_id, action, add_id, uuid, english, russian, czech
+        SELECT user_id, action, add_id, uuid, english, russian, czech, german
         FROM user_actions 
         INNER JOIN user_info ON user_actions.user_id = user_info.id
         INNER JOIN main ON user_actions.add_id = main.id

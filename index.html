@@ -33,6 +33,10 @@
                     <label for="czech">Czech:</label>
                     <input type="text" id="czech" placeholder="Enter Czech Word">
                 </div>
+                <div>
+                    <label for="german">German:</label>
+                    <input type="text" id="german" placeholder="Enter German Word">
+                </div>
             
                 <button onclick="addEntry()">Add</button>
                 <div id="result"></div>
@@ -53,6 +57,10 @@
                     <button class="tooltip" onclick="translateTo('cz')">
                         <img src="img/czech.png" alt=""/>
                         <span class="tooltip_text">CZECH</span>
+                    </button>
+                    <button class="tooltip" onclick="translateTo('ger')">
+                        <img src="img/german.png" alt=""/>
+                        <span class="tooltip_text">GERMAN</span>
                     </button>
                 </div>
                 <div class="button_next">
@@ -125,13 +133,14 @@
             const english = document.getElementById('english').value;
             const russian = document.getElementById('russian').value;
             const czech = document.getElementById('czech').value;
+            const german = document.getElementById('german').value;
             const token = localStorage.getItem('token')
             
             // включаем preloader, для блокировки повторных нажатий и отображения процесса запроса
             enableLoader();
 
             // Формируем тело запроса
-            const body = { english, russian, czech, token };
+            const body = { english, russian, czech, german, token };
             postData("http://192.168.1.35:9999/add", body)
             .then((data) => {
                 // Успешный результат
@@ -203,6 +212,9 @@
             }
             if (lang === 'cz') {
                 document.getElementById('label-translate').innerHTML = words[2]; 
+            }
+            if (lang === 'ger') {
+                document.getElementById('label-translate').innerHTML = words[3]; 
             }
             // enableLoader();
             // const body = {lang: lang};
