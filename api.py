@@ -298,24 +298,31 @@ def flash_card():
             result = jsonify({'data': resp})
             return result
 
-passed_word_count = 0
+session_passed_word_count = 0
 @app.route('/next', methods=['POST'])
 def next_word():
-    global passed_word_count
+    global session_passed_word_count
     if request.data:
-        # rcv_data = json.loads(request.data.decode(encoding='utf-8'))
-        # token = rcv_data['token']
-        # print(token)
+        rcv_data = json.loads(request.data.decode(encoding='utf-8'))
+        token = rcv_data['token']
+
+        sql_select_query_2 = """
+        SELECT passed_word_count
+        FROM user_info 
+        WHERE uuid = %s"""
+        mycursor.execute(sql_select_query_2, (token, ))
+        fetch = mycursor.fetchall()
+
+        plus_1 = fetch[0][0]+1
+        sql_insert_query = """
+        UPDATE user_info
+        SET passed_word_count = %s
+        WHERE uuid = %s"""
+        mycursor.execute(sql_insert_query, (plus_1, token))
+        mydb.commit()
+
         word = random_words()  # Получаем случайное слово
-        passed_word_count += 1
-        mycursor.execute("SELECT passed_word_count, id FROM user_info")          
-        select = mycursor.fetchall()
-        # print(select)
-        # mycursor.execute("UPDATE user_info SET passed_word_count = %s WHERE id = %s", (select[0], select[1],))            
-        # update = mycursor.fetchall()
-        # plus_one = fetch[4][0]+1
-        # mycursor.execute("UPDATE user_info SET passed_word_count = %s")            
-        # fetch = mycursor.fetchall()
+        session_passed_word_count += 1     
         return jsonify({'data': word})        
 
             
@@ -323,10 +330,10 @@ def next_word():
 
 @app.route('/registration', methods=['POST'])
 def regist():
-    global passed_word_count
+    global session_passed_word_count
     if request.data:
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
-        passed_word_count = 0
+        session_passed_word_count = 0
         print('POST rcv_data', rcv_data)
 
         if add_new_user(rcv_data) == True:
@@ -343,11 +350,11 @@ def regist():
             
 @app.route('/authorization', methods=['POST'])
 def autoriz():
-    global passed_word_count
+    global session_passed_word_count
     if request.data:
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
         print(request.data)
-        passed_word_count = 0
+        session_passed_word_count = 0
         if login(rcv_data) == True:
             token = add_uuid(rcv_data)
             
@@ -372,19 +379,26 @@ def statist():
     if request.data:
         rcv_data = json.loads(request.data.decode(encoding='utf-8'))
         token = rcv_data['token']
-        sql_select_query = """
+        sql_select_query_1 = """
         SELECT user_id, action, add_id, uuid, english, russian, czech, german
         FROM user_actions 
         INNER JOIN user_info ON user_actions.user_id = user_info.id
         INNER JOIN main ON user_actions.add_id = main.id
         WHERE action = 'add' AND uuid = %s"""
-        mycursor.execute(sql_select_query, (token, ))
+        mycursor.execute(sql_select_query_1, (token, ))
+        fetch_session = mycursor.fetchall()
+
+        sql_select_query_2 = """
+        SELECT passed_word_count
+        FROM user_info 
+        WHERE uuid = %s"""
+        mycursor.execute(sql_select_query_2, (token, ))
         fetch = mycursor.fetchall()
+
         eng_words_list = []
-        print(passed_word_count)
-        for i in fetch:
+        for i in fetch_session:
             eng_words_list.append(i[4])
-        return {'pass_words': passed_word_count, 'add_words':eng_words_list}
+        return {'pass_words':fetch[0][0],'session_pass_words': session_passed_word_count, 'add_words':eng_words_list}
 
 
 # @app.route('/<usr>')

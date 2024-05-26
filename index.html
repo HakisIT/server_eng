@@ -98,9 +98,10 @@
         </section>
         <section class="content__section" id="four" data-default="true">
             <h1>session statistics</h1> <button onclick="statistic()">Update</button>
-            <div>Пройдено слов: <label id="statistic_pass">0</label></div>
+            <div>Пройдено слов за всё время: <label id="all_the_time_pass_word">0</label></div>
+            <div>Пройдено слов за сессию: <label id="session_pass_word">1</label></div>
             <div>Добавлено слов: 
-                <div id="statistic_add">1</div>
+                <div id="statistic_add">2</div>
             </div>
 
         </section>
@@ -238,7 +239,8 @@
 
         function next() {
             enableLoader();
-            const body = {};
+            const token = localStorage.getItem('token');
+            const body = {token};
 
             postData("http://192.168.1.35:9999/next", body)
                 .then((response) => {
@@ -297,7 +299,8 @@
             .then((response) => {
                 
                 // console.log(data); // строка для отладки, показывает ответ в console браузера
-                document.getElementById('statistic_pass').innerHTML = response.pass_words; // число
+                document.getElementById('all_the_time_pass_word').innerHTML = response.pass_words; // число
+                document.getElementById('session_pass_word').innerHTML = response.session_pass_words; // число
 
                 const response_html = response.add_words.map(item => `<div>${item}</div>`).join('');
                 document.getElementById('statistic_add').innerHTML = response_html; // массив
@@ -307,13 +310,15 @@
                 console.error('Error fetching data:', error);
                 // update with mock
                 const mock = {
-                    pass_words: 5,
+                    pass_words: 125,
+                    session_pass_words: 5,
                     add_words: ['add', 'new', 'hello']
                 };
 
                 const mock_html = mock.add_words.map(item => `<div>${item}</div>`).join('');
-
-                document.getElementById('statistic_pass').innerHTML = mock.pass_words; // число
+                
+                document.getElementById('all_the_time_pass_word').innerHTML = response.pass_words; // число
+                document.getElementById('session_pass_word').innerHTML = mock.session_pass_words; // число
                 document.getElementById('statistic_add').innerHTML = mock_html; // массив
             })
             .finally(() => {
