@@ -11,15 +11,40 @@
 <body>
     <nav class="navigation">
         <ul class="navigation__list">
-            <li class="navigation__item"><a class="navigation__link" href="#one">Add</a></li>
-            <li class="navigation__item"><a class="navigation__link" href="#two">Flashcards</a></li>
-            <li class="navigation__item"><a class="navigation__link" href="#three">Registration</a></li>
-            <li class="navigation__item"><a class="navigation__link" href="#four">Statistics</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#German_Articles">German Articles</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#Add">Add</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#Flashcards">Flashcards</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#Registration">Registration</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#Statistics">Statistics</a></li>
+            
         </ul>
     </nav>
 
     <main class="content">
-        <section class="content__section" id="one">
+        <section class="content__section" id="German_Articles">
+            <div class="word_translate">
+                <div class="label" id="label-translate">WORD</div>
+                <div class="buttons">
+                    <button class="tooltip" onclick="translateTo('die')">
+                        <h1>Die</h1>
+                    </button>
+                    <button class="tooltip" onclick="translateTo('das')">
+                        <h1>Das</h1>
+                    </button>
+                    <button class="tooltip" onclick="translateTo('der')">
+                        <h1>Der</h1>
+                    </button>
+                </div>
+                <div class="button_next">
+                    <button class="tooltip" onclick="next()">
+                        <img src="img/arrow.png" alt=""/>
+                        <span class="tooltip_text">NEXT</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="content__section" id="Add">
             <div class="newEntry">
                 <div>
                     <label for="english">English:</label>
@@ -42,7 +67,7 @@
                 <div id="result"></div>
             </div>
         </section>
-        <section class="content__section" id="two">
+        <section class="content__section" id="Flashcards">
             <div class="word_translate">
                 <div class="label" id="label-translate">TEXT</div>
                 <div class="buttons">
@@ -71,7 +96,7 @@
                 </div>
             </div>
         </section>
-        <section class="content__section" id="three">
+        <section class="content__section" id="Statistics">
             <div class="registration" id="registration">
                 <!-- <a href="" class="close" onclick="closeRegistrationForm"></a> -->
                 <input type="checkbox" id="chk" aria-hidden="true">
@@ -96,7 +121,7 @@
                 </div>
             </div>     
         </section>
-        <section class="content__section" id="four" data-default="true">
+        <section class="content__section" id="Registration" data-default="true">
             <h1>session statistics</h1> <button onclick="statistic()">Update</button>
             <div>Пройдено слов за всё время: <label id="all_the_time_pass_word">0</label></div>
             <div>Пройдено слов за сессию: <label id="session_pass_word">1</label></div>
