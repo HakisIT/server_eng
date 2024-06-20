@@ -26,15 +26,14 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 
 
-def selection_id(word_id):
+def selection_main(word_id):
     sql_select_query = """SELECT * FROM main WHERE id = %s"""
     mycursor.execute(sql_select_query, (word_id,))
     word1 = mycursor.fetchall()
     dct = {word1[0][0]:[word1[0][1], word1[0][2], word1[0][3], word1[0][4]]}
     return dct
 
-
-def select_main():
+def selection_id():
     mycursor = mydb.cursor()
     mycursor.execute('SELECT id FROM main')
     words = mycursor.fetchall()
@@ -43,6 +42,22 @@ def select_main():
         id_lst.append(i[0])
     return id_lst
 
+
+def select_acticle(word_id):
+    sql_select_query = """SELECT * FROM german_articles WHERE id = %s"""
+    mycursor.execute(sql_select_query, (word_id,))
+    word1 = mycursor.fetchall()
+    dct = {word1[0][0]:[word1[0][1], word1[0][2]]}
+    return dct
+
+def select_acticle_id():
+    mycursor = mydb.cursor()
+    mycursor.execute('SELECT id FROM german_articles')
+    words = mycursor.fetchall()
+    id_lst = []
+    for i in words:
+        id_lst.append(i[0])
+    return id_lst
 
 def selection_word():
     sql_select_query = "SELECT english FROM main"
@@ -261,12 +276,12 @@ def search_text(word):
     if word in selection_word():
         return {'data': 'success'}
     else:
-        return 'page not found, all posible id {}'.format(select_main())
+        return 'page not found, all posible id {}'.format(selection_id())
     
 
 @app.route('/id/<int:word_id>')
 def get(word_id):
-    return selection_id(word_id)
+    return selection_main(word_id)
 
 
 @app.route('/add', methods=['POST'])
@@ -282,10 +297,23 @@ def process_data():
             else:
                 return jsonify({'data': 'strings must not contain numbers and cannot be empty'})
         
-
+@app.route('/random')
+def random_id():
+    rnd_id = random.choice(selection_id())
+    return selection_main(rnd_id)
+    
 def random_words():
     random_word = list(random_id().values())[0]
     return random_word
+
+def random_article_id():
+    rnd_art_id = random.choice(select_acticle_id())
+    return select_acticle(rnd_art_id)
+
+def random_article():
+    rnd_article = list(random_article_id().values())[0]
+    return rnd_article
+print(random_article())
 
 @app.route('/translate', methods=['POST'])
 def flash_card():
@@ -405,11 +433,6 @@ def statist():
 # def user(usr):
 #     return f"<h1>{'Success add '+ usr}</h1>"
 
-
-@app.route('/random')
-def random_id():
-    rnd_id = random.choice(select_main())
-    return selection_id(rnd_id)
 
 
 

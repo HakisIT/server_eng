@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRANSLATOR</title>
+    <title>LANGUAGE TRAINER</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 
@@ -23,7 +23,7 @@
     <main class="content">
         <section class="content__section" id="German_Articles">
             <div class="word_translate">
-                <div class="label" id="label-translate">WORD</div>
+                <div class="label" id="label-article">WORD</div>
                 <div class="buttons">
                     <button class="tooltip" onclick="translateTo('die')">
                         <h1>Die</h1>
@@ -140,6 +140,7 @@
 
     <script>
         let words = '';
+        let articles = '';
 
         function enableLoader() {
             const loader = document.getElementById('loader');
@@ -226,6 +227,21 @@
             // });
         }
 
+        function articlesTo(art) {
+            if (!articles) {
+                return;
+            }
+            if (art === 'die') {
+                document.getElementById('label-article').innerHTML = articles[0]; 
+            }
+            if (art === 'das') {
+                document.getElementById('label-article').innerHTML = articles[1]; 
+            }
+            if (art === 'der') {
+                document.getElementById('label-article').innerHTML = articles[2]; 
+            }
+        
+        }
         function translateTo(lang) {
             if (!words) {
                 return;
