@@ -14,8 +14,8 @@
             <li class="navigation__item"><a class="navigation__link" href="#German_Articles">German Articles</a></li>
             <li class="navigation__item"><a class="navigation__link" href="#Add">Add</a></li>
             <li class="navigation__item"><a class="navigation__link" href="#Flashcards">Flashcards</a></li>
-            <li class="navigation__item"><a class="navigation__link" href="#Registration">Registration</a></li>
-            <li class="navigation__item"><a class="navigation__link" href="#Statistics">Statistics</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#Registration">Statistics</a></li>
+            <li class="navigation__item"><a class="navigation__link" href="#Statistics">Registration</a></li>
             
         </ul>
     </nav>
@@ -97,7 +97,7 @@
             </div>
         </section>
         <section class="content__section" id="Statistics">
-            <div class="registration" id="registration">
+            <div class="registration" id="Statistics">
                 <!-- <a href="" class="close" onclick="closeRegistrationForm"></a> -->
                 <input type="checkbox" id="chk" aria-hidden="true">
         
@@ -168,7 +168,7 @@
 
             // Формируем тело запроса
             const body = { english, russian, czech, german, token };
-            postData("http://192.168.1.35:9999/add", body)
+            postData("http://192.168.199.45:8080/add", body)
             .then((data) => {
                 // Успешный результат
                 const dataObj = JSON.stringify(data);
@@ -204,7 +204,7 @@
             // Формируем тело запроса
             const body = { user, password, email };
 
-            postData("http://192.168.1.35:9999/registration", body)
+            postData("http://192.168.199.45:8080/registration", body)
             .then(res => {
                 document.getElementById('notification').innerHTML = res.result_label;
                 setTimeout(() => {
@@ -261,7 +261,7 @@
             // enableLoader();
             // const body = {lang: lang};
 
-            // postData("http://192.168.1.35:9999/translate", body)
+            // postData("http://192.168.199.45:8080/translate", body)
             //     .then((response) => {
             //         // Успешный результат
             //         const dataObj = response;
@@ -283,7 +283,7 @@
             const token = localStorage.getItem('token');
             const body = {token};
 
-            postData("http://192.168.1.35:9999/next", body)
+            postData("http://192.168.199.45:8080/next", body)
                 .then((response) => {
                     // Успешный результат
                     document.getElementById('label-translate').innerHTML = response.data[0];
@@ -308,7 +308,7 @@
             enableLoader();
             // Формируем тело запроса в виде JSON
             const body = { user, password};
-            postData("http://192.168.1.35:9999/authorization", body)
+            postData("http://192.168.199.45:8080/authorization", body)
             .then((response) => {
                 // Успешный результат
                 // const dataObj = JSON.stringify(data);
@@ -336,7 +336,7 @@
             const token = localStorage.getItem('token');
             const body = {token};
             
-            postData("http://192.168.1.35:9999/statistic", body)
+            postData("http://192.168.199.45:8080/statistic", body)
             .then((response) => {
                 
                 // console.log(data); // строка для отладки, показывает ответ в console браузера

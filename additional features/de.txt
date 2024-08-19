@@ -1,0 +1,64 @@
+die Prüfung - экзамен
+die Ausstellung - выставка
+die Hausaufgabe - домашняя работа/задание
+der Bericht - доклад/отчёт
+die Eltern - родители
+die Reise - поездка/путешествие
+die Flasche - бутылка
+der Bleistift - карандаш
+die Besucher - гость
+die Sache - вещь/штука
+der Wald - лес
+die Berge - горы
+der Schlüssel - ключ
+die Lebensmittel - продукты
+die Regel - правило
+die Mensa - студенческая столовая
+die Sprechstunde - консультация
+die Übung - упражнение
+der Termin - встреча/срок
+der Kommilitone - однокурсник
+die Stunde - час
+der Unterricht - занятие
+die Aussage - выражение/утверждение
+die Haltestelle - остановка
+das Getränk - напиток
+die Sehenswürdigkeit - достопримечательность
+die Theke - стойка
+der Strand - пляж
+die Insel - остров
+der Fluss - река
+die Wanderung - тур/поход
+der Nachbar - сосед
+das Heft - тетрадь
+die Klausur - контрольная работа/экзамен
+der Führer - лидер
+das Angebot - предложение
+der Rabatt - акция/скидка
+die Laune - настроение
+die Art - вид
+die Freundschaft - дружба
+das Fach - отрасль/учебный предмет
+die Sache - вещь
+das Gemüse - овощи
+das Freibad - открытый бассейн
+das Bad - ванна/ванная комната
+das Tier - животное
+die Tierärztin - ветеринар
+der Zahn - зуб
+der Onkel - дядя
+die Tante - тетя
+der Cousin - двоюродный брат/кузин
+der Papagei - попугай
+die Enkeltochter - внучка
+der Enkelsohn - внук
+das Enkelkind - внук и внучка
+das Zeichen - подписать/рисовать
+die Weintraube - виноград
+das Weihnachten - рождество
+die Aussage - утверждение
+
+
+
+
+

@@ -8,8 +8,8 @@ import json
 import hashlib
 
 
-HOST = '192.168.1.35'
-PORT = 9999
+HOST = '192.168.199.45'
+PORT = 8080
 
 app = Flask(__name__)
 
@@ -437,4 +437,4 @@ def statist():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=9999, host="192.168.1.35")
+    app.run(debug=True, port=8080, host="192.168.199.45")
