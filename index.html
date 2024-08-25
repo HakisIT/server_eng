@@ -22,16 +22,16 @@
 
     <main class="content">
         <section class="content__section" id="German_Articles">
-            <div class="word_translate">
+            <div class="article_card">
                 <div class="label" id="label-article">WORD</div>
                 <div class="buttons">
-                    <button class="tooltip" onclick="translateTo('die')">
+                    <button class="tooltip" onclick="articlesTo('die')">
                         <h1>Die</h1>
                     </button>
-                    <button class="tooltip" onclick="translateTo('das')">
+                    <button class="tooltip" onclick="articlesTo('das')">
                         <h1>Das</h1>
                     </button>
-                    <button class="tooltip" onclick="translateTo('der')">
+                    <button class="tooltip" onclick="articlesTo('der')">
                         <h1>Der</h1>
                     </button>
                 </div>
@@ -69,7 +69,7 @@
         </section>
         <section class="content__section" id="Flashcards">
             <div class="word_translate">
-                <div class="label" id="label-translate">TEXT</div>
+                <div class="label" id="label-translate">WORD</div>
                 <div class="buttons">
                     <button class="tooltip" onclick="translateTo('rus')">
                         <img src="img/rus.png" alt=""/>
@@ -287,6 +287,29 @@
                 .then((response) => {
                     // Успешный результат
                     document.getElementById('label-translate').innerHTML = response.data[0];
+                    words = response.data;
+                    // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
+                    // console.log(dataObj); // строка для отладки, показывает ответ в console браузера
+                })
+                .catch(error => {
+                    // Обработка ошибок
+                    console.error('Error fetching data:', error);
+                })
+                .finally(() => {
+                    disableLoader();
+                });
+
+        }
+
+        function next_article() {
+            enableLoader();
+            const token = localStorage.getItem('token');
+            const body = {token};
+
+            postData("http://192.168.199.45:8080/next_article", body)
+                .then((response) => {
+                    // Успешный результат
+                    document.getElementById('label-article').innerHTML = response.data[0];
                     words = response.data;
                     // Тут ответ приходящий из сервера можно записать в localStorage, если регистрация возвращает uuid
                     // console.log(dataObj); // строка для отладки, показывает ответ в console браузера

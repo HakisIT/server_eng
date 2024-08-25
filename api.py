@@ -47,7 +47,7 @@ def select_acticle(word_id):
     sql_select_query = """SELECT * FROM german_articles WHERE id = %s"""
     mycursor.execute(sql_select_query, (word_id,))
     word1 = mycursor.fetchall()
-    dct = {word1[0][0]:[word1[0][1], word1[0][2]]}
+    dct = {word1[0][0]:[word1[0][1], word1[0][2], word1[0][3]]}
     return dct
 
 def select_acticle_id():
@@ -269,6 +269,16 @@ def flash_card_translate(rcv_data, rnd_word):
         print(rcv_data['lang'])
         return rnd_word[3]
     
+def article_card(rcv_data, rnd_word):
+    if rcv_data['art'] == 'der':
+        return rnd_word[0]
+    
+    if rcv_data['art'] == 'die':
+        return rnd_word[1]
+    
+    if rcv_data['art'] == 'das':
+        return rnd_word[2]
+    
     
 
 @app.route('/search/<word>')
@@ -325,6 +335,17 @@ def flash_card():
             resp = flash_card_translate(rcv_data, word)
             result = jsonify({'data': resp})
             return result
+        
+@app.route('/article', methods=['POST'])
+def article_card():
+    if request.method == 'POST':
+        if request.data:
+            rcv_data = json.loads(request.data.decode(encoding='utf-8'))
+            word = random_article()  # Получаем случайное слово
+            print(word)
+            resp = article_card(rcv_data, word)
+            result = jsonify({'data': resp})
+            return result
 
 session_passed_word_count = 0
 @app.route('/next', methods=['POST'])
@@ -353,7 +374,13 @@ def next_word():
         session_passed_word_count += 1     
         return jsonify({'data': word})        
 
-            
+
+@app.route('/next_article', methods=['POST'])
+def next_article():
+    if request.data:
+        rcv_data = json.loads(request.data.decode(encoding='utf-8'))
+        word = random_article()  # Получаем случайное слово
+        return jsonify({'data': word})      
             
 
 @app.route('/registration', methods=['POST'])
